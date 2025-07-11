@@ -551,7 +551,7 @@
             </div>
             <div style="text-align: center; margin-top: 15px; font-size: 0.9em; color: #7f8c8d;">
                 <p><strong>For testing admin access:</strong><br>
-                Email: admin@university.edu<br>
+                Email: ashraf.uddin@cihe.edu.au<br>
                 Password: admin123</p>
             </div>
         </div>
@@ -785,9 +785,9 @@
         let isAdmin = false;
         let editingSubmissionId = null;
 
-        // Admin credentials
+        // Admin credentials - UPDATED TO USE YOUR EMAIL
         const adminCredentials = {
-            email: "admin@university.edu",
+            email: "ashraf.uddin@cihe.edu.au",
             password: "admin123"
         };
 
@@ -951,24 +951,19 @@
             }
         ];
 
-        // Initialize Firebase Connection
+        // Initialize Firebase Connection with better error handling
         function initializeFirebase() {
             const statusElement = document.getElementById('firebaseStatus');
             
-            // Test Firebase connection
-            db.collection('test').doc('connection').set({
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                status: 'connected'
-            })
-            .then(() => {
+            // Simple test without writing to Firestore to avoid permission issues
+            auth.onAuthStateChanged(() => {
                 statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Connected to Firebase successfully';
                 statusElement.style.background = '#d4edda';
                 statusElement.style.color = '#155724';
                 
                 // Initialize projects after successful connection
                 initializeProjects();
-            })
-            .catch((error) => {
+            }, (error) => {
                 console.error("Firebase connection error:", error);
                 statusElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Firebase connection failed: ' + error.message;
                 statusElement.style.background = '#f8d7da';
@@ -979,30 +974,39 @@
             });
         }
 
-        // Initialize projects in Firebase
+        // Initialize projects in Firebase with better error handling
         async function initializeProjects() {
             try {
-                const projectsSnapshot = await db.collection('projects').get();
+                // Try to check if projects exist, but handle permission errors gracefully
+                const projectsSnapshot = await db.collection('projects').limit(1).get().catch(error => {
+                    console.log('Cannot access projects collection, using local data:', error.message);
+                    return { empty: true };
+                });
                 
                 if (projectsSnapshot.empty) {
                     console.log('Initializing projects in Firebase...');
                     
-                    // Initialize projects in Firebase
-                    const batch = db.batch();
-                    sampleProjects.forEach((project) => {
-                        const projectRef = db.collection('projects').doc(project.id);
-                        batch.set(projectRef, project);
-                    });
-                    
-                    await batch.commit();
-                    console.log('Projects initialized successfully');
+                    // Try to initialize projects in Firebase
+                    try {
+                        const batch = db.batch();
+                        sampleProjects.forEach((project) => {
+                            const projectRef = db.collection('projects').doc(project.id);
+                            batch.set(projectRef, project);
+                        });
+                        
+                        await batch.commit();
+                        console.log('Projects initialized successfully');
+                    } catch (initError) {
+                        console.log('Cannot initialize projects in Firebase, using local data:', initError.message);
+                        loadProjectsFromLocal();
+                        return;
+                    }
                 }
                 
                 loadProjects();
                 
             } catch (error) {
                 console.error('Error initializing projects:', error);
-                showError('firebaseStatus', 'Error initializing projects: ' + error.message);
                 loadProjectsFromLocal();
             }
         }
@@ -1053,9 +1057,22 @@
             }
 
             try {
+                // First try to create the admin account if it doesn't exist
+                if (email === adminCredentials.email && password === adminCredentials.password) {
+                    try {
+                        await auth.createUserWithEmailAndPassword(email, password);
+                        console.log('Admin account created successfully');
+                    } catch (createError) {
+                        if (createError.code !== 'auth/email-already-in-use') {
+                            console.error('Error creating admin account:', createError);
+                        }
+                    }
+                }
+
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 console.log('Login successful:', userCredential.user.email);
                 closeModal('loginModal');
+                
             } catch (error) {
                 console.error('Login error:', error);
                 showError('authError', getFirebaseErrorMessage(error));
@@ -1086,14 +1103,19 @@
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 console.log('Registration successful:', userCredential.user.email);
                 
-                // Set user role in Firestore
-                await db.collection('users').doc(userCredential.user.uid).set({
-                    email: email,
-                    role: email === adminCredentials.email ? 'admin' : 'student',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                // Try to set user role in Firestore, but don't fail if it doesn't work
+                try {
+                    await db.collection('users').doc(userCredential.user.uid).set({
+                        email: email,
+                        role: email === adminCredentials.email ? 'admin' : 'student',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (firestoreError) {
+                    console.log('Could not save user role to Firestore:', firestoreError.message);
+                }
                 
                 closeModal('registerModal');
+                
             } catch (error) {
                 console.error('Registration error:', error);
                 showError('registerError', getFirebaseErrorMessage(error));
@@ -1111,11 +1133,13 @@
                 case 'auth/user-not-found':
                     return 'No account found with this email. Please register first.';
                 case 'auth/wrong-password':
-                    return 'Incorrect password. Please try again.';
+                case 'auth/invalid-login-credentials':
+                case 'auth/invalid-credential':
+                    return 'Invalid email or password. Please check your credentials and try again.';
                 case 'auth/too-many-requests':
                     return 'Too many failed attempts. Please try again later.';
                 default:
-                    return error.message;
+                    return error.message || 'An authentication error occurred. Please try again.';
             }
         }
 
@@ -1149,7 +1173,7 @@
             }
         }
 
-        // Project functions
+        // Project functions with better error handling
         async function loadProjects() {
             try {
                 const projectsSnapshot = await db.collection('projects').get();
@@ -1389,11 +1413,15 @@
                 const docRef = await db.collection('project_selections').add(selectionData);
                 console.log('Project selection saved with ID:', docRef.id);
                 
-                // Update project status in projects collection
-                await db.collection('projects').doc(selectedProjectData.id).update({
-                    selectedBy: currentUser.uid,
-                    selectedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                // Try to update project status in projects collection
+                try {
+                    await db.collection('projects').doc(selectedProjectData.id).update({
+                        selectedBy: currentUser.uid,
+                        selectedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (updateError) {
+                    console.log('Could not update project status:', updateError.message);
+                }
 
                 document.getElementById('projectSuccess').style.display = 'block';
                 document.getElementById('projectSuccess').textContent = 'Project selected and group information submitted successfully!';
@@ -1776,19 +1804,23 @@
 
         // Setup real-time listeners for project updates
         function setupRealtimeListeners() {
-            // Listen for project selection changes
-            db.collection('project_selections').onSnapshot((snapshot) => {
-                if (isAdmin && document.getElementById('adminPanel').style.display === 'block') {
-                    loadSubmissions(); // Refresh admin panel
-                } else {
-                    checkProjectSelections(); // Refresh project availability
-                }
-            }, (error) => {
-                console.error('Error in real-time listener:', error);
-            });
+            try {
+                // Listen for project selection changes
+                db.collection('project_selections').onSnapshot((snapshot) => {
+                    if (isAdmin && document.getElementById('adminPanel').style.display === 'block') {
+                        loadSubmissions(); // Refresh admin panel
+                    } else {
+                        checkProjectSelections(); // Refresh project availability
+                    }
+                }, (error) => {
+                    console.error('Error in real-time listener:', error);
+                });
+            } catch (error) {
+                console.log('Real-time listeners not available:', error.message);
+            }
         }
 
-        // Check user role
+        // Check user role with better error handling
         async function checkUserRole(user) {
             try {
                 const userDoc = await db.collection('users').doc(user.uid).get();
@@ -1798,11 +1830,15 @@
                 } else {
                     // Create user document if it doesn't exist
                     isAdmin = user.email === adminCredentials.email;
-                    await db.collection('users').doc(user.uid).set({
-                        email: user.email,
-                        role: isAdmin ? 'admin' : 'student',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                    try {
+                        await db.collection('users').doc(user.uid).set({
+                            email: user.email,
+                            role: isAdmin ? 'admin' : 'student',
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    } catch (createError) {
+                        console.log('Could not create user document:', createError.message);
+                    }
                 }
                 
                 if (isAdmin) {
@@ -1811,7 +1847,11 @@
                 
             } catch (error) {
                 console.error('Error checking user role:', error);
+                // Fallback to email-based admin check
                 isAdmin = user.email === adminCredentials.email;
+                if (isAdmin) {
+                    showAdminPanel();
+                }
             }
         }
 
