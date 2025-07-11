@@ -636,6 +636,73 @@
         </div>
     </div>
 
+    <!-- Admin Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>Edit Group Information</h2>
+                <button class="close-btn" onclick="closeModal('editModal')">&times;</button>
+            </div>
+            <div id="editError" class="error" style="display: none;"></div>
+            <div id="editSuccess" class="success" style="display: none;"></div>
+            
+            <div class="form-group">
+                <label for="editGroupName">Group Name *</label>
+                <input type="text" id="editGroupName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="editGroupLeader">Group Leader *</label>
+                <input type="text" id="editGroupLeader" required>
+            </div>
+
+            <div class="form-group">
+                <label for="editLeaderEmail">Leader Email *</label>
+                <input type="email" id="editLeaderEmail" required>
+            </div>
+
+            <div class="form-group">
+                <label for="editLeaderStudentId">Leader Student ID *</label>
+                <input type="text" id="editLeaderStudentId" required>
+            </div>
+
+            <div class="form-group">
+                <label>Group Members</label>
+                <div id="editMembersContainer">
+                </div>
+                <button type="button" class="btn btn-secondary btn-small" onclick="addEditMemberField()">
+                    <i class="fas fa-plus"></i> Add Member
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label for="editMotivation">Motivation *</label>
+                <textarea id="editMotivation" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="editExpectedSkills">Expected Skills</label>
+                <textarea id="editExpectedSkills"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="editStatus">Status</label>
+                <select id="editStatus">
+                    <option value="selected">Selected</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="saveGroupEdit()">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('editModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Admin Panel -->
     <div id="adminPanel" style="display: none;">
         <div class="main-content" style="margin-top: 20px;">
@@ -676,10 +743,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <script>
-                    // Firebase Configuration - REPLACE WITH YOUR CONFIG
-            // Your web app's Firebase configuration
-            // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-            const firebaseConfig = {
+        // Firebase Configuration - Your actual config
+        const firebaseConfig = {
             apiKey: "AIzaSyBvKn1TjSOadZAJp7g2Nexqrhp5ZP5SePg",
             authDomain: "capstoneproject-ee777.firebaseapp.com",
             projectId: "capstoneproject-ee777",
@@ -687,8 +752,8 @@
             messagingSenderId: "776231964642",
             appId: "1:776231964642:web:043dff922e71e8264ab3bb",
             measurementId: "G-YNREVD0YMR"
-            };
-            
+        };
+
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
@@ -699,6 +764,7 @@
         let selectedProjectData = null;
         let allSubmissions = [];
         let isAdmin = false;
+        let editingSubmissionId = null;
 
         // Admin credentials (in production, use proper authentication)
         const adminCredentials = {
@@ -877,17 +943,22 @@
 
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
-            // Clear error messages
-            const errorElements = ['authError', 'projectError', 'adminError'];
+            // Clear error and success messages
+            const errorElements = ['authError', 'projectError', 'adminError', 'editError'];
             errorElements.forEach(id => {
                 const element = document.getElementById(id);
                 if (element) element.style.display = 'none';
             });
-            const successElements = ['projectSuccess'];
+            const successElements = ['projectSuccess', 'editSuccess'];
             successElements.forEach(id => {
                 const element = document.getElementById(id);
                 if (element) element.style.display = 'none';
             });
+            
+            // Reset editing state
+            if (modalId === 'editModal') {
+                editingSubmissionId = null;
+            }
         }
 
         function adminLogin() {
@@ -978,10 +1049,56 @@
 
         // Project functions
         function loadProjects() {
-            // In a real application, you would load from Firebase
-            // For demo purposes, using sample data
+            // Initialize projects in Firebase if not exists and load them
             allProjects = sampleProjects;
-            displayProjects(allProjects);
+            
+            // Check if projects collection exists in Firebase, if not, initialize it
+            db.collection('projects').get().then((querySnapshot) => {
+                if (querySnapshot.empty) {
+                    // Initialize projects in Firebase
+                    sampleProjects.forEach((project) => {
+                        db.collection('projects').doc(project.id).set(project)
+                            .then(() => {
+                                console.log('Project initialized in Firebase:', project.id);
+                            })
+                            .catch((error) => {
+                                console.error('Error initializing project:', error);
+                            });
+                    });
+                } else {
+                    // Load existing projects from Firebase
+                    const firebaseProjects = [];
+                    querySnapshot.forEach((doc) => {
+                        firebaseProjects.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                    allProjects = firebaseProjects;
+                }
+                
+                // Check which projects are already selected
+                checkProjectSelections();
+            });
+        }
+
+        function checkProjectSelections() {
+            db.collection('project_selections').get().then((querySnapshot) => {
+                const selectedProjectIds = [];
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    selectedProjectIds.push(data.projectId);
+                });
+                
+                // Update project status
+                allProjects.forEach(project => {
+                    if (selectedProjectIds.includes(project.id)) {
+                        project.selectedBy = 'selected'; // Mark as selected
+                    }
+                });
+                
+                displayProjects(allProjects);
+            });
         }
 
         function displayProjects(projects) {
@@ -1156,7 +1273,6 @@
 
             // Create selection data
             const selectionData = {
-                id: 'submission_' + Date.now(),
                 projectId: selectedProjectData.id,
                 projectTitle: selectedProjectData.title,
                 projectCategory: selectedProjectData.category,
@@ -1170,35 +1286,58 @@
                 motivation: motivation,
                 expectedSkills: expectedSkills,
                 selectedBy: currentUser.uid,
-                selectedAt: new Date().toISOString(),
+                selectedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 status: 'selected'
             };
 
-            // Save to local storage (in production, save to Firebase)
-            const existingSubmissions = JSON.parse(localStorage.getItem('projectSubmissions') || '[]');
-            existingSubmissions.push(selectionData);
-            localStorage.setItem('projectSubmissions', JSON.stringify(existingSubmissions));
+            // Save to Firebase Firestore
+            db.collection('project_selections').add(selectionData)
+                .then((docRef) => {
+                    console.log('Document written with ID: ', docRef.id);
+                    
+                    // Update project status in projects collection
+                    db.collection('projects').doc(selectedProjectData.id).update({
+                        selectedBy: currentUser.uid,
+                        selectedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
 
-            // Update local data
-            const projectIndex = allProjects.findIndex(p => p.id === selectedProjectData.id);
-            if (projectIndex !== -1) {
-                allProjects[projectIndex].selectedBy = currentUser.uid;
-            }
+                    document.getElementById('projectSuccess').style.display = 'block';
+                    document.getElementById('projectSuccess').textContent = 'Project selected and group information submitted successfully!';
+                    
+                    setTimeout(() => {
+                        closeModal('projectModal');
+                        displayProjects(allProjects);
+                        clearProjectForm();
+                    }, 2000);
+                })
+                .catch((error) => {
+                    console.error('Error adding document: ', error);
+                    showError('projectError', 'Error submitting project selection. Please try again.');
+                });
+        }
 
-            document.getElementById('projectSuccess').style.display = 'block';
-            document.getElementById('projectSuccess').textContent = 'Project selected and group information submitted successfully!';
+        function clearProjectForm() {
+            document.getElementById('groupName').value = '';
+            document.getElementById('groupLeader').value = '';
+            document.getElementById('leaderEmail').value = '';
+            document.getElementById('leaderStudentId').value = '';
+            document.getElementById('motivation').value = '';
+            document.getElementById('expectedSkills').value = '';
             
-            setTimeout(() => {
-                closeModal('projectModal');
-                displayProjects(allProjects);
-                // Clear form
-                document.getElementById('groupName').value = '';
-                document.getElementById('groupLeader').value = '';
-                document.getElementById('leaderEmail').value = '';
-                document.getElementById('leaderStudentId').value = '';
-                document.getElementById('motivation').value = '';
-                document.getElementById('expectedSkills').value = '';
-            }, 2000);
+            // Clear member inputs
+            const membersContainer = document.getElementById('membersContainer');
+            membersContainer.innerHTML = `
+                <div class="member-input">
+                    <input type="text" placeholder="Member 1 Full Name" required>
+                    <input type="email" placeholder="Member 1 Email" required>
+                    <input type="text" placeholder="Student ID" required>
+                </div>
+                <div class="member-input">
+                    <input type="text" placeholder="Member 2 Full Name">
+                    <input type="email" placeholder="Member 2 Email">
+                    <input type="text" placeholder="Student ID">
+                </div>
+            `;
         }
 
         // Admin Panel Functions
@@ -1206,7 +1345,6 @@
             document.querySelector('.main-content').style.display = 'none';
             document.getElementById('adminPanel').style.display = 'block';
             loadSubmissions();
-            populateProjectFilter();
         }
 
         function hideAdminPanel() {
@@ -1215,9 +1353,28 @@
         }
 
         function loadSubmissions() {
-            // Load from local storage (in production, load from Firebase)
-            allSubmissions = JSON.parse(localStorage.getItem('projectSubmissions') || '[]');
-            displaySubmissions(allSubmissions);
+            const container = document.getElementById('submissionsContainer');
+            container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading group submissions...</div>';
+            
+            // Load from Firebase Firestore
+            db.collection('project_selections')
+                .orderBy('selectedAt', 'desc')
+                .get()
+                .then((querySnapshot) => {
+                    allSubmissions = [];
+                    querySnapshot.forEach((doc) => {
+                        allSubmissions.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                    displaySubmissions(allSubmissions);
+                    populateProjectFilter();
+                })
+                .catch((error) => {
+                    console.error('Error loading submissions: ', error);
+                    container.innerHTML = '<div class="error">Error loading submissions. Please try again.</div>';
+                });
         }
 
         function populateProjectFilter() {
@@ -1240,7 +1397,9 @@
 
             const submissionsHTML = submissions.map(submission => {
                 const statusClass = `status-${submission.status}`;
-                const submissionDate = new Date(submission.selectedAt).toLocaleDateString();
+                const submissionDate = submission.selectedAt ? 
+                    submission.selectedAt.toDate().toLocaleDateString() : 
+                    'Unknown date';
                 
                 return `
                     <div class="submission-card">
@@ -1294,8 +1453,11 @@
                             <button class="btn btn-reject btn-small" onclick="updateSubmissionStatus('${submission.id}', 'rejected')">
                                 <i class="fas fa-times"></i> Reject
                             </button>
-                            <button class="btn btn-secondary btn-small" onclick="viewSubmissionDetails('${submission.id}')">
-                                <i class="fas fa-eye"></i> View Details
+                            <button class="btn btn-primary btn-small" onclick="editSubmission('${submission.id}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="deleteSubmission('${submission.id}')">
+                                <i class="fas fa-trash"></i> Delete
                             </button>
                         </div>
                     </div>
@@ -1319,37 +1481,167 @@
         }
 
         function updateSubmissionStatus(submissionId, newStatus) {
-            const submissions = JSON.parse(localStorage.getItem('projectSubmissions') || '[]');
-            const submissionIndex = submissions.findIndex(sub => sub.id === submissionId);
-            
-            if (submissionIndex !== -1) {
-                submissions[submissionIndex].status = newStatus;
-                localStorage.setItem('projectSubmissions', JSON.stringify(submissions));
-                loadSubmissions();
-            }
+            db.collection('project_selections').doc(submissionId).update({
+                status: newStatus,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                console.log('Status updated successfully');
+                loadSubmissions(); // Reload to show updated status
+            })
+            .catch((error) => {
+                console.error('Error updating status: ', error);
+                alert('Error updating status. Please try again.');
+            });
         }
 
-        function viewSubmissionDetails(submissionId) {
+        function editSubmission(submissionId) {
             const submission = allSubmissions.find(sub => sub.id === submissionId);
-            if (submission) {
-                alert(`Group: ${submission.groupName}\nProject: ${submission.projectTitle}\nLeader: ${submission.groupLeader.name}\nMembers: ${submission.members.length + 1}\nStatus: ${submission.status.toUpperCase()}\nDate: ${new Date(submission.selectedAt).toLocaleString()}`);
+            if (!submission) return;
+
+            editingSubmissionId = submissionId;
+
+            // Populate edit form
+            document.getElementById('editGroupName').value = submission.groupName;
+            document.getElementById('editGroupLeader').value = submission.groupLeader.name;
+            document.getElementById('editLeaderEmail').value = submission.groupLeader.email;
+            document.getElementById('editLeaderStudentId').value = submission.groupLeader.studentId;
+            document.getElementById('editMotivation').value = submission.motivation;
+            document.getElementById('editExpectedSkills').value = submission.expectedSkills || '';
+            document.getElementById('editStatus').value = submission.status;
+
+            // Populate members
+            const editMembersContainer = document.getElementById('editMembersContainer');
+            editMembersContainer.innerHTML = '';
+            
+            submission.members.forEach(member => {
+                const memberDiv = document.createElement('div');
+                memberDiv.className = 'member-input';
+                memberDiv.innerHTML = `
+                    <input type="text" value="${member.name}" placeholder="Member Name">
+                    <input type="email" value="${member.email}" placeholder="Member Email">
+                    <input type="text" value="${member.studentId}" placeholder="Student ID">
+                    <button type="button" class="btn btn-secondary btn-small" onclick="this.parentElement.remove()">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                editMembersContainer.appendChild(memberDiv);
+            });
+
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function addEditMemberField() {
+            const container = document.getElementById('editMembersContainer');
+            const memberDiv = document.createElement('div');
+            memberDiv.className = 'member-input';
+            memberDiv.innerHTML = `
+                <input type="text" placeholder="Member Name">
+                <input type="email" placeholder="Member Email">
+                <input type="text" placeholder="Student ID">
+                <button type="button" class="btn btn-secondary btn-small" onclick="this.parentElement.remove()">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(memberDiv);
+        }
+
+        function saveGroupEdit() {
+            if (!editingSubmissionId) return;
+
+            const groupName = document.getElementById('editGroupName').value;
+            const groupLeader = document.getElementById('editGroupLeader').value;
+            const leaderEmail = document.getElementById('editLeaderEmail').value;
+            const leaderStudentId = document.getElementById('editLeaderStudentId').value;
+            const motivation = document.getElementById('editMotivation').value;
+            const expectedSkills = document.getElementById('editExpectedSkills').value;
+            const status = document.getElementById('editStatus').value;
+
+            if (!groupName || !groupLeader || !leaderEmail || !leaderStudentId || !motivation) {
+                showError('editError', 'Please fill in all required fields');
+                return;
+            }
+
+            // Collect member information
+            const memberInputs = document.querySelectorAll('#editMembersContainer .member-input');
+            const members = [];
+            
+            memberInputs.forEach(memberDiv => {
+                const inputs = memberDiv.querySelectorAll('input');
+                if (inputs[0].value && inputs[1].value) {
+                    members.push({
+                        name: inputs[0].value,
+                        email: inputs[1].value,
+                        studentId: inputs[2].value || 'Not provided'
+                    });
+                }
+            });
+
+            const updatedData = {
+                groupName: groupName,
+                groupLeader: {
+                    name: groupLeader,
+                    email: leaderEmail,
+                    studentId: leaderStudentId
+                },
+                members: members,
+                motivation: motivation,
+                expectedSkills: expectedSkills,
+                status: status,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            db.collection('project_selections').doc(editingSubmissionId).update(updatedData)
+                .then(() => {
+                    document.getElementById('editSuccess').style.display = 'block';
+                    document.getElementById('editSuccess').textContent = 'Group information updated successfully!';
+                    
+                    setTimeout(() => {
+                        closeModal('editModal');
+                        loadSubmissions();
+                        editingSubmissionId = null;
+                    }, 1500);
+                })
+                .catch((error) => {
+                    console.error('Error updating document: ', error);
+                    showError('editError', 'Error updating group information. Please try again.');
+                });
+        }
+
+        function deleteSubmission(submissionId) {
+            if (confirm('Are you sure you want to delete this group submission? This action cannot be undone.')) {
+                db.collection('project_selections').doc(submissionId).delete()
+                    .then(() => {
+                        console.log('Document successfully deleted');
+                        loadSubmissions();
+                    })
+                    .catch((error) => {
+                        console.error('Error removing document: ', error);
+                        alert('Error deleting submission. Please try again.');
+                    });
             }
         }
 
         function exportData() {
+            if (allSubmissions.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
             const csvContent = "data:text/csv;charset=utf-8," 
-                + "Group Name,Project Title,Leader Name,Leader Email,Leader Student ID,Member Names,Member Emails,Student IDs,Status,Submission Date,Motivation\n"
+                + "Group Name,Project Title,Leader Name,Leader Email,Leader Student ID,Member Names,Member Emails,Student IDs,Status,Submission Date,Motivation,Expected Skills\n"
                 + allSubmissions.map(sub => {
                     const memberNames = sub.members.map(m => m.name).join(';');
                     const memberEmails = sub.members.map(m => m.email).join(';');
                     const memberIds = sub.members.map(m => m.studentId).join(';');
-                    return `"${sub.groupName}","${sub.projectTitle}","${sub.groupLeader.name}","${sub.groupLeader.email}","${sub.groupLeader.studentId}","${memberNames}","${memberEmails}","${memberIds}","${sub.status}","${sub.selectedAt}","${sub.motivation.replace(/"/g, '""')}"`;
+                    const submissionDate = sub.selectedAt ? sub.selectedAt.toDate().toISOString() : '';
+                    return `"${sub.groupName}","${sub.projectTitle}","${sub.groupLeader.name}","${sub.groupLeader.email}","${sub.groupLeader.studentId}","${memberNames}","${memberEmails}","${memberIds}","${sub.status}","${submissionDate}","${sub.motivation.replace(/"/g, '""')}","${(sub.expectedSkills || '').replace(/"/g, '""')}"`;
                 }).join("\n");
 
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "project_submissions.csv");
+            link.setAttribute("download", `project_submissions_${new Date().toISOString().split('T')[0]}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1387,8 +1679,21 @@
             if (user && !isAdmin) {
                 currentUser = user;
                 updateAuthUI();
+                setupRealtimeListeners();
             }
         });
+
+        // Setup real-time listeners for project updates
+        function setupRealtimeListeners() {
+            // Listen for project selection changes
+            db.collection('project_selections').onSnapshot((snapshot) => {
+                if (isAdmin && document.getElementById('adminPanel').style.display === 'block') {
+                    loadSubmissions(); // Refresh admin panel
+                } else {
+                    checkProjectSelections(); // Refresh project availability
+                }
+            });
+        }
 
         // Load projects when page loads
         window.addEventListener('load', () => {
