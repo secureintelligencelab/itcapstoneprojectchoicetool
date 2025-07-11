@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Capstone Project Choice Tool</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .auth-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .main-content {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        select, input {
+            padding: 10px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid #3498db;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .project-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .project-category {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .project-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .project-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .detail-item i {
+            color: #3498db;
+            width: 16px;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .tech-tag {
+            background: #ecf0f1;
+            color: #2c3e50;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9em;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        .member-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .member-input input {
+            flex: 1;
+        }
+
+        .submission-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border-left: 5px solid #3498db;
+        }
+
+        .submission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .submission-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .submission-project {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .status-selected {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .submission-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .members-list {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .member-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .member-item:last-child {
+            border-bottom: none;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-approve {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+        }
+
+        .btn-reject {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .user-info {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #7f8c8d;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .project-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div>
+                    <h1><i class="fas fa-laptop-code"></i> IT Capstone Project Choice Tool</h1>
+                    <p class="subtitle">Discover and select your industry-relevant capstone project</p>
+                    <p style="font-size: 0.8em; color: #7f8c8d; margin-top: 5px;">
+                        <strong>For testing:</strong> Admin login - Email: admin@university.edu, Password: admin123
+                    </p>
+                </div>
+                <div class="auth-section">
+                    <div id="authButtons">
+                        <button class="btn btn-primary" onclick="showLoginModal()">
+                            <i class="fas fa-sign-in-alt"></i> Student Login
+                        </button>
+                        <button class="btn btn-secondary" onclick="showAdminModal()">
+                            <i class="fas fa-user-shield"></i> Admin Login
+                        </button>
+                    </div>
+                    <div id="userInfo" style="display: none;" class="user-info">
+                        <span id="userEmail"></span>
+                        <span id="userRole" style="margin-left: 10px; font-weight: bold;"></span>
+                        <button class="btn btn-secondary btn-small" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="categoryFilter">Category</label>
+                    <select id="categoryFilter" onchange="filterProjects()">
+                        <option value="">All Categories</option>
+                        <option value="Cloud Computing">Cloud Computing & Infrastructure</option>
+                        <option value="Cybersecurity">Cybersecurity & Network Security</option>
+                        <option value="Database">Database Management & Analytics</option>
+                        <option value="Enterprise">Enterprise Systems & Integration</option>
+                        <option value="Web Development">Web & Mobile Development</option>
+                        <option value="IT Service">IT Service Management</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="difficultyFilter">Difficulty</label>
+                    <select id="difficultyFilter" onchange="filterProjects()">
+                        <option value="">All Levels</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="teamSizeFilter">Team Size</label>
+                    <select id="teamSizeFilter" onchange="filterProjects()">
+                        <option value="">Any Size</option>
+                        <option value="2-3">2-3 Members</option>
+                        <option value="3-4">3-4 Members</option>
+                        <option value="4-5">4-5 Members</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="searchFilter">Search</label>
+                    <input type="text" id="searchFilter" placeholder="Search projects..." oninput="filterProjects()">
+                </div>
+            </div>
+
+            <div id="projectsContainer">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Loading projects...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Student Login</h2>
+                <button class="close-btn" onclick="closeModal('loginModal')">&times;</button>
+            </div>
+            <div id="authError" class="error" style="display: none;"></div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="Enter your student email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your password" required>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="login()">Login</button>
+                <button class="btn btn-secondary" onclick="showRegister()">Register</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Selection Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Select Project & Provide Group Information</h2>
+                <button class="close-btn" onclick="closeModal('projectModal')">&times;</button>
+            </div>
+            <div id="projectError" class="error" style="display: none;"></div>
+            <div id="projectSuccess" class="success" style="display: none;"></div>
+            
+            <div id="selectedProjectInfo"></div>
+            
+            <div class="form-group">
+                <label for="groupName">Group Name *</label>
+                <input type="text" id="groupName" placeholder="e.g., Team Alpha, CloudMasters, etc." required>
+            </div>
+
+            <div class="form-group">
+                <label for="groupLeader">Group Leader *</label>
+                <input type="text" id="groupLeader" placeholder="Group leader name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="leaderEmail">Leader Email *</label>
+                <input type="email" id="leaderEmail" placeholder="Group leader email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="leaderStudentId">Leader Student ID *</label>
+                <input type="text" id="leaderStudentId" placeholder="Student ID number" required>
+            </div>
+
+            <div class="form-group">
+                <label>Group Members *</label>
+                <div id="membersContainer">
+                    <div class="member-input">
+                        <input type="text" placeholder="Member 1 Full Name" required>
+                        <input type="email" placeholder="Member 1 Email" required>
+                        <input type="text" placeholder="Student ID" required>
+                    </div>
+                    <div class="member-input">
+                        <input type="text" placeholder="Member 2 Full Name">
+                        <input type="email" placeholder="Member 2 Email">
+                        <input type="text" placeholder="Student ID">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary btn-small" onclick="addMemberField()">
+                    <i class="fas fa-plus"></i> Add Another Member
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label for="motivation">Why did you choose this project? *</label>
+                <textarea id="motivation" placeholder="Describe your motivation for selecting this project and how it aligns with your learning goals..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="expectedSkills">What skills do you hope to gain?</label>
+                <textarea id="expectedSkills" placeholder="List the technical and professional skills you expect to develop..."></textarea>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="selectProject()">
+                    <i class="fas fa-check"></i> Select Project & Submit Group Info
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('projectModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Admin Login</h2>
+                <button class="close-btn" onclick="closeModal('adminModal')">&times;</button>
+            </div>
+            <div id="adminError" class="error" style="display: none;"></div>
+            <div class="form-group">
+                <label for="adminEmail">Admin Email</label>
+                <input type="email" id="adminEmail" placeholder="Enter admin email" required>
+            </div>
+            <div class="form-group">
+                <label for="adminPassword">Password</label>
+                <input type="password" id="adminPassword" placeholder="Enter admin password" required>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="adminLogin()">Login as Admin</button>
+                <button class="btn btn-secondary" onclick="closeModal('adminModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" style="display: none;">
+        <div class="main-content" style="margin-top: 20px;">
+            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+                <h2><i class="fas fa-users-cog"></i> Group Submissions Dashboard</h2>
+                <button class="btn btn-secondary" onclick="exportData()">
+                    <i class="fas fa-download"></i> Export Data
+                </button>
+            </div>
+            
+            <div class="filters" style="margin-bottom: 20px;">
+                <div class="filter-group">
+                    <label for="projectFilter">Filter by Project</label>
+                    <select id="projectFilter" onchange="filterSubmissions()">
+                        <option value="">All Projects</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="statusFilter">Filter by Status</label>
+                    <select id="statusFilter" onchange="filterSubmissions()">
+                        <option value="">All Status</option>
+                        <option value="selected">Selected</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="submissionsContainer">
+                <div class="loading">Loading group submissions...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+                    // Firebase Configuration - REPLACE WITH YOUR CONFIG
+            // Your web app's Firebase configuration
+            // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+            const firebaseConfig = {
+            apiKey: "AIzaSyBvKn1TjSOadZAJp7g2Nexqrhp5ZP5SePg",
+            authDomain: "capstoneproject-ee777.firebaseapp.com",
+            projectId: "capstoneproject-ee777",
+            storageBucket: "capstoneproject-ee777.firebasestorage.app",
+            messagingSenderId: "776231964642",
+            appId: "1:776231964642:web:043dff922e71e8264ab3bb",
+            measurementId: "G-YNREVD0YMR"
+            };
+            
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        let allProjects = [];
+        let selectedProjectData = null;
+        let allSubmissions = [];
+        let isAdmin = false;
+
+        // Admin credentials (in production, use proper authentication)
+        const adminCredentials = {
+            email: "admin@university.edu",
+            password: "admin123"
+        };
+
+        // Sample project data
+        const sampleProjects = [
+            {
+                id: "cloud-migration-tool",
+                title: "Small Business Cloud Migration Tool",
+                category: "Cloud Computing",
+                description: "Develop an automated assessment and migration tool for moving on-premises systems to cloud platforms (AWS/Azure/GCP). This tool will help small businesses transition to the cloud with minimal downtime.",
+                difficulty: "Intermediate",
+                teamSize: "3-4",
+                duration: "16 weeks",
+                techStack: ["JavaScript", "Node.js", "AWS SDK", "React", "Docker"],
+                prerequisites: ["Cloud Computing Fundamentals", "Web Development", "Database Management"],
+                learningOutcomes: [
+                    "Cloud architecture design and implementation",
+                    "Infrastructure as Code (IaC) principles",
+                    "Cost optimization strategies",
+                    "Security best practices for cloud migration"
+                ],
+                industryRelevance: "High demand for cloud migration services as businesses move to remote work models",
+                deliverables: [
+                    "Migration assessment tool",
+                    "Automated deployment scripts",
+                    "Cost analysis dashboard",
+                    "Migration documentation"
+                ],
+                mentorInfo: "Industry mentor from AWS/Azure certified architect",
+                selectedBy: null
+            },
+            {
+                id: "cybersecurity-dashboard",
+                title: "Security Information Dashboard for SMBs",
+                category: "Cybersecurity",
+                description: "Create an affordable SIEM solution tailored for small and medium businesses with real-time threat monitoring, automated incident response, and compliance reporting.",
+                difficulty: "Advanced",
+                teamSize: "4-5",
+                duration: "16 weeks",
+                techStack: ["Python", "Elasticsearch", "Kibana", "React", "Docker", "Machine Learning"],
+                prerequisites: ["Cybersecurity Fundamentals", "Network Security", "Data Analysis"],
+                learningOutcomes: [
+                    "Security information and event management (SIEM)",
+                    "Threat detection algorithms",
+                    "Incident response automation",
+                    "Compliance reporting systems"
+                ],
+                industryRelevance: "Critical need for affordable cybersecurity solutions for SMBs",
+                deliverables: [
+                    "Real-time monitoring dashboard",
+                    "Automated threat detection system",
+                    "Incident response workflows",
+                    "Compliance reporting module"
+                ],
+                mentorInfo: "Cybersecurity consultant with 10+ years experience",
+                selectedBy: null
+            },
+            {
+                id: "customer-analytics",
+                title: "Customer Analytics Dashboard",
+                category: "Database",
+                description: "Build a real-time customer behavior analysis platform for e-commerce businesses with predictive analytics, segmentation, and personalized recommendation engine.",
+                difficulty: "Intermediate",
+                teamSize: "3-4",
+                duration: "16 weeks",
+                techStack: ["Python", "PostgreSQL", "MongoDB", "Apache Kafka", "React", "TensorFlow"],
+                prerequisites: ["Database Management", "Data Analytics", "Statistics"],
+                learningOutcomes: [
+                    "Real-time data processing",
+                    "Customer segmentation techniques",
+                    "Predictive analytics modeling",
+                    "Business intelligence dashboard design"
+                ],
+                industryRelevance: "Essential for e-commerce businesses to understand customer behavior",
+                deliverables: [
+                    "Customer analytics dashboard",
+                    "Recommendation engine",
+                    "Segmentation algorithms",
+                    "Predictive models"
+                ],
+                mentorInfo: "Data scientist from major e-commerce company",
+                selectedBy: null
+            },
+            {
+                id: "help-desk-system",
+                title: "AI-Powered Help Desk System",
+                category: "Enterprise",
+                description: "Develop a complete IT service management solution with AI chatbot, automated ticket routing, knowledge management, and SLA monitoring for enterprise environments.",
+                difficulty: "Intermediate",
+                teamSize: "3-4",
+                duration: "16 weeks",
+                techStack: ["Node.js", "Express", "MongoDB", "React", "Natural Language Processing", "REST APIs"],
+                prerequisites: ["Web Development", "Database Design", "Basic AI/ML"],
+                learningOutcomes: [
+                    "Enterprise software architecture",
+                    "Natural language processing integration",
+                    "Workflow automation design",
+                    "Service level agreement management"
+                ],
+                industryRelevance: "Every organization needs efficient IT service management",
+                deliverables: [
+                    "Ticket management system",
+                    "AI chatbot interface",
+                    "Knowledge base platform",
+                    "Analytics and reporting module"
+                ],
+                mentorInfo: "IT service management director from Fortune 500 company",
+                selectedBy: null
+            },
+            {
+                id: "mobile-field-service",
+                title: "Field Service Management Mobile App",
+                category: "Web Development",
+                description: "Create a comprehensive mobile application for field technicians with offline capability, GPS tracking, inventory management, and real-time communication.",
+                difficulty: "Beginner",
+                teamSize: "2-3",
+                duration: "16 weeks",
+                techStack: ["React Native", "Node.js", "SQLite", "GPS APIs", "Firebase"],
+                prerequisites: ["Mobile Development", "Database Fundamentals", "API Integration"],
+                learningOutcomes: [
+                    "Mobile app development for enterprise",
+                    "Offline-first architecture",
+                    "GPS and mapping integration",
+                    "Real-time data synchronization"
+                ],
+                industryRelevance: "Critical for service-based businesses with field operations",
+                deliverables: [
+                    "Mobile application (iOS/Android)",
+                    "Backend API system",
+                    "Admin web dashboard",
+                    "Integration documentation"
+                ],
+                mentorInfo: "Mobile development lead from field service company",
+                selectedBy: null
+            },
+            {
+                id: "network-monitoring",
+                title: "Network Performance Monitoring Dashboard",
+                category: "IT Service",
+                description: "Build a comprehensive network monitoring solution with real-time performance tracking, alerting system, and predictive maintenance capabilities.",
+                difficulty: "Advanced",
+                teamSize: "4-5",
+                duration: "16 weeks",
+                techStack: ["Python", "SNMP", "Grafana", "InfluxDB", "React", "Docker"],
+                prerequisites: ["Network Administration", "System Monitoring", "Data Visualization"],
+                learningOutcomes: [
+                    "Network protocol analysis",
+                    "Real-time monitoring systems",
+                    "Alerting and notification systems",
+                    "Performance optimization techniques"
+                ],
+                industryRelevance: "Essential for maintaining enterprise network infrastructure",
+                deliverables: [
+                    "Network monitoring dashboard",
+                    "Alerting system",
+                    "Performance analytics",
+                    "Maintenance scheduling tool"
+                ],
+                mentorInfo: "Network operations center manager",
+                selectedBy: null
+            }
+        ];
+
+        // Authentication functions
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'block';
+        }
+
+        function showAdminModal() {
+            document.getElementById('adminModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            // Clear error messages
+            const errorElements = ['authError', 'projectError', 'adminError'];
+            errorElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.style.display = 'none';
+            });
+            const successElements = ['projectSuccess'];
+            successElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.style.display = 'none';
+            });
+        }
+
+        function adminLogin() {
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+
+            if (email === adminCredentials.email && password === adminCredentials.password) {
+                currentUser = { uid: 'admin', email: email };
+                isAdmin = true;
+                updateAuthUI();
+                closeModal('adminModal');
+                showAdminPanel();
+            } else {
+                showError('adminError', 'Invalid admin credentials');
+            }
+        }
+
+        function showRegister() {
+            // For demo purposes, using a simple prompt
+            // In production, you'd have a proper registration form
+            const email = prompt("Enter your student email:");
+            const password = prompt("Enter a password (min 6 characters):");
+            
+            if (email && password && password.length >= 6) {
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        currentUser = userCredential.user;
+                        updateAuthUI();
+                        closeModal('loginModal');
+                    })
+                    .catch((error) => {
+                        showError('authError', error.message);
+                    });
+            }
+        }
+
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                showError('authError', 'Please fill in all fields');
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    currentUser = userCredential.user;
+                    updateAuthUI();
+                    closeModal('loginModal');
+                })
+                .catch((error) => {
+                    showError('authError', error.message);
+                });
+        }
+
+        function logout() {
+            if (isAdmin) {
+                currentUser = null;
+                isAdmin = false;
+                hideAdminPanel();
+            } else {
+                auth.signOut().then(() => {
+                    currentUser = null;
+                    isAdmin = false;
+                });
+            }
+            updateAuthUI();
+        }
+
+        function updateAuthUI() {
+            const authButtons = document.getElementById('authButtons');
+            const userInfo = document.getElementById('userInfo');
+            const userEmail = document.getElementById('userEmail');
+            const userRole = document.getElementById('userRole');
+
+            if (currentUser) {
+                authButtons.style.display = 'none';
+                userInfo.style.display = 'flex';
+                userEmail.textContent = currentUser.email;
+                userRole.textContent = isAdmin ? '(Admin)' : '(Student)';
+                userRole.style.color = isAdmin ? '#e74c3c' : '#27ae60';
+            } else {
+                authButtons.style.display = 'flex';
+                userInfo.style.display = 'none';
+            }
+        }
+
+        // Project functions
+        function loadProjects() {
+            // In a real application, you would load from Firebase
+            // For demo purposes, using sample data
+            allProjects = sampleProjects;
+            displayProjects(allProjects);
+        }
+
+        function displayProjects(projects) {
+            const container = document.getElementById('projectsContainer');
+            
+            if (projects.length === 0) {
+                container.innerHTML = '<div class="loading">No projects found matching your criteria.</div>';
+                return;
+            }
+
+            const projectsHTML = projects.map(project => {
+                const isSelected = project.selectedBy && project.selectedBy !== currentUser?.uid;
+                const selectionStatus = isSelected ? 
+                    '<span style="color: #e74c3c; font-weight: bold;">Already Selected</span>' : 
+                    '<span style="color: #27ae60; font-weight: bold;">Available</span>';
+
+                return `
+                    <div class="project-card ${isSelected ? 'selected' : ''}">
+                        <div class="project-header">
+                            <div>
+                                <div class="project-title">${project.title}</div>
+                                <div style="font-size: 0.9em; color: #7f8c8d; margin-bottom: 10px;">
+                                    Status: ${selectionStatus}
+                                </div>
+                            </div>
+                            <div class="project-category">${project.category}</div>
+                        </div>
+                        
+                        <div class="project-description">${project.description}</div>
+                        
+                        <div class="project-details">
+                            <div class="detail-item">
+                                <i class="fas fa-signal"></i>
+                                <span><strong>Difficulty:</strong> ${project.difficulty}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-users"></i>
+                                <span><strong>Team Size:</strong> ${project.teamSize}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-clock"></i>
+                                <span><strong>Duration:</strong> ${project.duration}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-graduation-cap"></i>
+                                <span><strong>Level:</strong> Bachelor</span>
+                            </div>
+                        </div>
+                        
+                        <div class="tech-stack">
+                            ${project.techStack.map(tech => `<span class="tech-tag">${tech}</span>`).join('')}
+                        </div>
+                        
+                        <div class="project-actions">
+                            <button class="btn btn-primary btn-small" onclick="showProjectDetails('${project.id}')">
+                                <i class="fas fa-info-circle"></i> View Details
+                            </button>
+                            ${!isSelected && currentUser ? 
+                                `<button class="btn btn-secondary btn-small" onclick="selectProjectModal('${project.id}')">
+                                    <i class="fas fa-check"></i> Select Project
+                                </button>` : ''
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `<div class="projects-grid">${projectsHTML}</div>`;
+        }
+
+        function showProjectDetails(projectId) {
+            const project = allProjects.find(p => p.id === projectId);
+            if (!project) return;
+
+            const detailsHTML = `
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3>${project.title}</h3>
+                    <p><strong>Category:</strong> ${project.category}</p>
+                    <p><strong>Description:</strong> ${project.description}</p>
+                    
+                    <h4>Prerequisites:</h4>
+                    <ul>
+                        ${project.prerequisites.map(prereq => `<li>${prereq}</li>`).join('')}
+                    </ul>
+                    
+                    <h4>Learning Outcomes:</h4>
+                    <ul>
+                        ${project.learningOutcomes.map(outcome => `<li>${outcome}</li>`).join('')}
+                    </ul>
+                    
+                    <h4>Deliverables:</h4>
+                    <ul>
+                        ${project.deliverables.map(deliverable => `<li>${deliverable}</li>`).join('')}
+                    </ul>
+                    
+                    <p><strong>Industry Relevance:</strong> ${project.industryRelevance}</p>
+                    <p><strong>Mentor:</strong> ${project.mentorInfo}</p>
+                </div>
+            `;
+
+            alert(detailsHTML.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n'));
+        }
+
+        function selectProjectModal(projectId) {
+            if (!currentUser) {
+                showLoginModal();
+                return;
+            }
+
+            selectedProjectData = allProjects.find(p => p.id === projectId);
+            
+            document.getElementById('selectedProjectInfo').innerHTML = `
+                <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3>${selectedProjectData.title}</h3>
+                    <p><strong>Category:</strong> ${selectedProjectData.category}</p>
+                    <p><strong>Team Size:</strong> ${selectedProjectData.teamSize}</p>
+                </div>
+            `;
+            
+            document.getElementById('projectModal').style.display = 'block';
+        }
+
+        function addMemberField() {
+            const container = document.getElementById('membersContainer');
+            const memberDiv = document.createElement('div');
+            memberDiv.className = 'member-input';
+            memberDiv.innerHTML = `
+                <input type="text" placeholder="Member Name">
+                <input type="email" placeholder="Member Email">
+                <input type="text" placeholder="Student ID">
+                <button type="button" class="btn btn-secondary btn-small" onclick="this.parentElement.remove()">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(memberDiv);
+        }
+
+        function selectProject() {
+            if (!selectedProjectData || !currentUser) return;
+
+            const groupName = document.getElementById('groupName').value;
+            const groupLeader = document.getElementById('groupLeader').value;
+            const leaderEmail = document.getElementById('leaderEmail').value;
+            const leaderStudentId = document.getElementById('leaderStudentId').value;
+            const motivation = document.getElementById('motivation').value;
+            const expectedSkills = document.getElementById('expectedSkills').value;
+            
+            if (!groupName || !groupLeader || !leaderEmail || !leaderStudentId || !motivation) {
+                showError('projectError', 'Please fill in all required fields (marked with *)');
+                return;
+            }
+
+            // Collect member information
+            const memberInputs = document.querySelectorAll('#membersContainer .member-input');
+            const members = [];
+            
+            memberInputs.forEach(memberDiv => {
+                const inputs = memberDiv.querySelectorAll('input');
+                if (inputs[0].value && inputs[1].value) {
+                    members.push({
+                        name: inputs[0].value,
+                        email: inputs[1].value,
+                        studentId: inputs[2].value || 'Not provided'
+                    });
+                }
+            });
+
+            if (members.length === 0) {
+                showError('projectError', 'Please add at least one team member');
+                return;
+            }
+
+            // Create selection data
+            const selectionData = {
+                id: 'submission_' + Date.now(),
+                projectId: selectedProjectData.id,
+                projectTitle: selectedProjectData.title,
+                projectCategory: selectedProjectData.category,
+                groupName: groupName,
+                groupLeader: {
+                    name: groupLeader,
+                    email: leaderEmail,
+                    studentId: leaderStudentId
+                },
+                members: members,
+                motivation: motivation,
+                expectedSkills: expectedSkills,
+                selectedBy: currentUser.uid,
+                selectedAt: new Date().toISOString(),
+                status: 'selected'
+            };
+
+            // Save to local storage (in production, save to Firebase)
+            const existingSubmissions = JSON.parse(localStorage.getItem('projectSubmissions') || '[]');
+            existingSubmissions.push(selectionData);
+            localStorage.setItem('projectSubmissions', JSON.stringify(existingSubmissions));
+
+            // Update local data
+            const projectIndex = allProjects.findIndex(p => p.id === selectedProjectData.id);
+            if (projectIndex !== -1) {
+                allProjects[projectIndex].selectedBy = currentUser.uid;
+            }
+
+            document.getElementById('projectSuccess').style.display = 'block';
+            document.getElementById('projectSuccess').textContent = 'Project selected and group information submitted successfully!';
+            
+            setTimeout(() => {
+                closeModal('projectModal');
+                displayProjects(allProjects);
+                // Clear form
+                document.getElementById('groupName').value = '';
+                document.getElementById('groupLeader').value = '';
+                document.getElementById('leaderEmail').value = '';
+                document.getElementById('leaderStudentId').value = '';
+                document.getElementById('motivation').value = '';
+                document.getElementById('expectedSkills').value = '';
+            }, 2000);
+        }
+
+        // Admin Panel Functions
+        function showAdminPanel() {
+            document.querySelector('.main-content').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            loadSubmissions();
+            populateProjectFilter();
+        }
+
+        function hideAdminPanel() {
+            document.querySelector('.main-content').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+        }
+
+        function loadSubmissions() {
+            // Load from local storage (in production, load from Firebase)
+            allSubmissions = JSON.parse(localStorage.getItem('projectSubmissions') || '[]');
+            displaySubmissions(allSubmissions);
+        }
+
+        function populateProjectFilter() {
+            const projectFilter = document.getElementById('projectFilter');
+            const uniqueProjects = [...new Set(allSubmissions.map(sub => sub.projectTitle))];
+            
+            projectFilter.innerHTML = '<option value="">All Projects</option>';
+            uniqueProjects.forEach(project => {
+                projectFilter.innerHTML += `<option value="${project}">${project}</option>`;
+            });
+        }
+
+        function displaySubmissions(submissions) {
+            const container = document.getElementById('submissionsContainer');
+            
+            if (submissions.length === 0) {
+                container.innerHTML = '<div class="loading">No group submissions found.</div>';
+                return;
+            }
+
+            const submissionsHTML = submissions.map(submission => {
+                const statusClass = `status-${submission.status}`;
+                const submissionDate = new Date(submission.selectedAt).toLocaleDateString();
+                
+                return `
+                    <div class="submission-card">
+                        <div class="submission-header">
+                            <div>
+                                <div class="submission-title">${submission.groupName}</div>
+                                <div class="submission-project">Project: ${submission.projectTitle}</div>
+                            </div>
+                            <div class="status-badge ${statusClass}">${submission.status.toUpperCase()}</div>
+                        </div>
+                        
+                        <div class="submission-details">
+                            <div>
+                                <strong>Group Leader:</strong><br>
+                                ${submission.groupLeader.name}<br>
+                                ${submission.groupLeader.email}<br>
+                                ID: ${submission.groupLeader.studentId}
+                            </div>
+                            <div>
+                                <strong>Submission Date:</strong> ${submissionDate}<br>
+                                <strong>Category:</strong> ${submission.projectCategory}<br>
+                                <strong>Team Size:</strong> ${submission.members.length + 1} members
+                            </div>
+                        </div>
+                        
+                        <div class="members-list">
+                            <strong>Team Members:</strong>
+                            ${submission.members.map(member => `
+                                <div class="member-item">
+                                    <strong>${member.name}</strong> - ${member.email} (ID: ${member.studentId})
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div>
+                            <strong>Motivation:</strong>
+                            <p>${submission.motivation}</p>
+                        </div>
+                        
+                        ${submission.expectedSkills ? `
+                            <div>
+                                <strong>Expected Skills:</strong>
+                                <p>${submission.expectedSkills}</p>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="admin-actions">
+                            <button class="btn btn-approve btn-small" onclick="updateSubmissionStatus('${submission.id}', 'approved')">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button class="btn btn-reject btn-small" onclick="updateSubmissionStatus('${submission.id}', 'rejected')">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="viewSubmissionDetails('${submission.id}')">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = submissionsHTML;
+        }
+
+        function filterSubmissions() {
+            const projectFilter = document.getElementById('projectFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            let filtered = allSubmissions.filter(submission => {
+                const matchesProject = !projectFilter || submission.projectTitle === projectFilter;
+                const matchesStatus = !statusFilter || submission.status === statusFilter;
+                return matchesProject && matchesStatus;
+            });
+
+            displaySubmissions(filtered);
+        }
+
+        function updateSubmissionStatus(submissionId, newStatus) {
+            const submissions = JSON.parse(localStorage.getItem('projectSubmissions') || '[]');
+            const submissionIndex = submissions.findIndex(sub => sub.id === submissionId);
+            
+            if (submissionIndex !== -1) {
+                submissions[submissionIndex].status = newStatus;
+                localStorage.setItem('projectSubmissions', JSON.stringify(submissions));
+                loadSubmissions();
+            }
+        }
+
+        function viewSubmissionDetails(submissionId) {
+            const submission = allSubmissions.find(sub => sub.id === submissionId);
+            if (submission) {
+                alert(`Group: ${submission.groupName}\nProject: ${submission.projectTitle}\nLeader: ${submission.groupLeader.name}\nMembers: ${submission.members.length + 1}\nStatus: ${submission.status.toUpperCase()}\nDate: ${new Date(submission.selectedAt).toLocaleString()}`);
+            }
+        }
+
+        function exportData() {
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "Group Name,Project Title,Leader Name,Leader Email,Leader Student ID,Member Names,Member Emails,Student IDs,Status,Submission Date,Motivation\n"
+                + allSubmissions.map(sub => {
+                    const memberNames = sub.members.map(m => m.name).join(';');
+                    const memberEmails = sub.members.map(m => m.email).join(';');
+                    const memberIds = sub.members.map(m => m.studentId).join(';');
+                    return `"${sub.groupName}","${sub.projectTitle}","${sub.groupLeader.name}","${sub.groupLeader.email}","${sub.groupLeader.studentId}","${memberNames}","${memberEmails}","${memberIds}","${sub.status}","${sub.selectedAt}","${sub.motivation.replace(/"/g, '""')}"`;
+                }).join("\n");
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "project_submissions.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function filterProjects() {
+            const category = document.getElementById('categoryFilter').value;
+            const difficulty = document.getElementById('difficultyFilter').value;
+            const teamSize = document.getElementById('teamSizeFilter').value;
+            const search = document.getElementById('searchFilter').value.toLowerCase();
+
+            let filtered = allProjects.filter(project => {
+                const matchesCategory = !category || project.category.includes(category);
+                const matchesDifficulty = !difficulty || project.difficulty === difficulty;
+                const matchesTeamSize = !teamSize || project.teamSize === teamSize;
+                const matchesSearch = !search || 
+                    project.title.toLowerCase().includes(search) ||
+                    project.description.toLowerCase().includes(search) ||
+                    project.techStack.some(tech => tech.toLowerCase().includes(search));
+
+                return matchesCategory && matchesDifficulty && matchesTeamSize && matchesSearch;
+            });
+
+            displayProjects(filtered);
+        }
+
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        // Initialize the application
+        auth.onAuthStateChanged((user) => {
+            if (user && !isAdmin) {
+                currentUser = user;
+                updateAuthUI();
+            }
+        });
+
+        // Load projects when page loads
+        window.addEventListener('load', () => {
+            loadProjects();
+            // Show student interface by default
+            document.querySelector('.main-content').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (event) => {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
